@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: goldfinch
+Version: 0.4
+Summary: Use to make sure that filenames will always be valid- Now in Python 3 too
+Home-page: https://github.com/PerAkeMattias/goldfinch
+Author: Per Ake Mattias
+Author-email: PerAkeMattias@gmail.com
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
