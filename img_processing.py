@@ -1,17 +1,15 @@
 from PIL import Image
 import requests
 from io import BytesIO
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 def main(pack_id):
     id_string = """"id":"""
     name_string = """"en":"""
-    author_string = """author":"""
 
     pack_meta = get_meta(pack_id).text
     pack_name = get_pack_name(name_string, pack_meta).strip()
-    print('Your sticker pack is "{}" by {}, am I right?'.format(
-        pack_name,
-        get_pack_author(author_string, pack_meta)))
+    print('Your sticker pack is "{}"?'.format(pack_name))
 
     ids = []
     current_id, start_index = 0, 0
@@ -20,11 +18,9 @@ def main(pack_id):
         start_index, current_id, pack_meta = get_ids(id_string,
                                                      pack_meta)
         ids.append(current_id)
-    ids.pop(24)
+    ids.pop(len(ids)-1)
 
-    if input() == '1':
-        images = get_png(ids)
-        print(len(images))
+    images = get_png(ids)
 
 def get_meta(pack_id):
     pack_url = "http://dl.stickershop.line.naver.jp/products/0/0/1/{}/android/productInfo.meta".format(pack_id)
@@ -40,12 +36,6 @@ def get_pack_name(name_string, pack_meta):
     end_index = pack_meta.find(',', start_index + 1)
     sticker_name = pack_meta[start_index+len(name_string)+1:end_index-1]
     return sticker_name
-
-def get_pack_author(author_string, pack_meta):
-    start_index = pack_meta.find(author_string)
-    end_index = pack_meta.find(',', start_index + 1)
-    sticker_author = pack_meta[start_index+len(author_string)+7:end_index-1]
-    return sticker_author
 
 def get_png(list_ids):
     png_list = []
