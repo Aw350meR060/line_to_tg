@@ -42,7 +42,7 @@ requests==2.22.0
 rsa==4.0
 six==1.12.0
 soupsieve==1.9.2
-tornado==6.0.3
+tornado==5.1.1
 urllib3==1.25.3
 validictory==1.1.2
 virtualenv==16.6.2
