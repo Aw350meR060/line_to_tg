@@ -77,6 +77,7 @@ def check_pack(update, context):
 
 
 def select_type(update, context):
+    print('a')
     if update.message.text != 'Yes':
         update.message.reply_text(text="Okay, you can try again by sending /download.")
         return ConversationHandler.END
