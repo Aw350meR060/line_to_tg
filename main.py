@@ -83,7 +83,7 @@ def select_type(update, context):
     pack_type = get_pack_name(name_string, pack_meta).strip()
     if pack_type == 'ANIMATED':
         update.message.reply_text("Do you wish your stickers to be animated or static?", reply_markup=markup_anim)
-    return SELECTING_TYPE
+    return CHECKING
 
 
 def parse_png(update, context):
