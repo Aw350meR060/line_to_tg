@@ -10,10 +10,13 @@ from io import BytesIO
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-CHECKING, WAITING = range(2)
+CHECKING, WAITING, SELECTING_TYPE = range(2)
 
 reply_yn = [['Yes', 'No']]
 markup = ReplyKeyboardMarkup(reply_yn, one_time_keyboard=True)
+
+reply_anim = [['Animated', 'Static']]
+markup_anim = ReplyKeyboardMarkup(reply_anim, one_time_keyboard=True)
 
 
 def main():
@@ -27,6 +30,7 @@ def main():
 
         states={
             WAITING: [MessageHandler(Filters.text, check_pack)],
+            SELECTING_TYPE: [MessageHandler(Filters.text, select_type)],
             CHECKING: [MessageHandler(Filters.text, parse_png)],
         },
 
@@ -69,22 +73,40 @@ def check_pack(update, context):
     context.user_data['pack_meta'] = pack_meta
     pack_name = get_pack_name(name_string, pack_meta).strip()
     update.message.reply_text("Your sticker pack is '" + pack_name + "', right?", reply_markup=markup)
-    return CHECKING
+    return SELECTING_TYPE
+
+
+def select_type(update, context):
+    update.message.reply_text()
+    pack_meta = context.user_data['pack_meta']
+    name_string = """"stickerResourceType":"""
+    pack_type = get_pack_name(name_string, pack_meta).strip()
+    if pack_type == 'ANIMATED':
+        update.message.reply_text("Do you wish your stickers to be animated or static?", reply_markup=markup_anim)
+    return SELECTING_TYPE
 
 
 def parse_png(update, context):
-    if update.message.text != 'Yes':
+    if update.message.text == 'Animated':
+        anim = True
+    elif update.message.text != 'Yes':
         update.message.reply_text(text="Okay, you can try again by sending /download.")
         return ConversationHandler.END
+    else:
+        anim = False
 
     pack_id = context.user_data['pack_id']
-    images = get_png(pack_id)
+    images = get_png(pack_id, anim)
     i = 1
 
     for img in images:
         bio = BytesIO()
-        bio.name = 'image{}.png'.format(i)
-        img.save(bio, 'PNG')
+        if anim:
+            bio.name = 'image{}.apng'.format(i)
+            img.save(bio, 'APNG')
+        else:
+            bio.name = 'image{}.png'.format(i)
+            img.save(bio, 'PNG')
         bio.seek(0)
         context.bot.send_document(chat_id=update.message.chat_id, document=bio)
         i += 1
@@ -111,8 +133,11 @@ def get_pack_name(name_string, pack_meta):
     return sticker_name
 
 
-def get_png(pack_id):
-    url = 'http://dl.stickershop.LINE.naver.jp/products/0/0/1/{}/iphone/stickerpack@2x.zip'.format(pack_id)
+def get_png(pack_id, anim):
+    if anim:
+        url = 'http://dl.stickershop.LINE.naver.jp/products/0/0/1/{}/iphone/stickerpack@2x.zip'.format(pack_id)
+    else:
+        url = 'http://dl.stickershop.LINE.naver.jp/products/0/0/1/{}/iphone/stickerpack@2x.zip'.format(pack_id)
     r = requests.get(url, stream=True)
     zip = zipfile.ZipFile(BytesIO(r.content))
     zip_list = zip.namelist()
