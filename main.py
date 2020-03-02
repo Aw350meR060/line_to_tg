@@ -10,7 +10,7 @@ from io import BytesIO
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-CHECKING, WAITING, SELECTING_TYPE = range(2)
+CHECKING, WAITING, SELECTING_TYPE = range(3)
 
 reply_yn = [['Yes', 'No']]
 markup = ReplyKeyboardMarkup(reply_yn, one_time_keyboard=True)
