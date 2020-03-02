@@ -86,7 +86,7 @@ def select_type(update, context):
     pack_meta = get_meta(pack_id, update, context).text
     name_string = """"stickerResourceType":"""
     pack_type = get_pack_feature(name_string, pack_meta).strip()
-    if pack_type == 'ANIMATED':
+    if pack_type == 'ANIMATION':
         update.message.reply_text("Do you wish your stickers to be animated or static?", reply_markup=markup_anim)
     return CHECKING
 
@@ -94,9 +94,6 @@ def select_type(update, context):
 def parse_png(update, context):
     if update.message.text == 'Animated':
         anim = True
-    elif update.message.text != 'Yes':
-        update.message.reply_text(text="Okay, you can try again by sending /download.")
-        return ConversationHandler.END
     else:
         anim = False
 
