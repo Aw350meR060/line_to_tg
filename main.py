@@ -21,7 +21,8 @@ def main():
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', 'help', start),
+        entry_points=[CommandHandler('start', start),
+                      CommandHandler('help', start),
                       CommandHandler('download', awaiting_id)],
 
         states={
