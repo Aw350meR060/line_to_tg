@@ -71,16 +71,20 @@ def check_pack(update, context):
     name_string = """"en":"""
     pack_meta = get_meta(pack_id, update, context).text
     context.user_data['pack_meta'] = pack_meta
-    pack_name = get_pack_name(name_string, pack_meta).strip()
+    pack_name = get_pack_feature(name_string, pack_meta).strip()
     update.message.reply_text("Your sticker pack is '" + pack_name + "', right?", reply_markup=markup)
     return SELECTING_TYPE
 
 
 def select_type(update, context):
-    update.message.reply_text()
-    pack_meta = context.user_data['pack_meta']
+    if update.message.text != 'Yes':
+        update.message.reply_text(text="Okay, you can try again by sending /download.")
+        return ConversationHandler.END
+
+    pack_id = context.user_data['pack_id']
+    pack_meta = get_meta(pack_id, update, context).text
     name_string = """"stickerResourceType":"""
-    pack_type = get_pack_name(name_string, pack_meta).strip()
+    pack_type = get_pack_feature(name_string, pack_meta).strip()
     if pack_type == 'ANIMATED':
         update.message.reply_text("Do you wish your stickers to be animated or static?", reply_markup=markup_anim)
     return CHECKING
@@ -126,7 +130,7 @@ def get_meta(pack_id, update, context):
         update.message.reply_text("Couldn't find requested sticker pack. Please re-check pack's ID.")
 
 
-def get_pack_name(name_string, pack_meta):
+def get_pack_feature(name_string, pack_meta):
     start_index = pack_meta.find(name_string)
     end_index = pack_meta.find(',', start_index + 1)
     sticker_name = pack_meta[start_index + len(name_string) + 1:end_index - 1]
@@ -137,16 +141,21 @@ def get_png(pack_id, anim):
     if anim:
         url = 'http://dl.stickershop.LINE.naver.jp/products/0/0/1/{}/iphone/stickerpack@2x.zip'.format(pack_id)
     else:
-        url = 'http://dl.stickershop.LINE.naver.jp/products/0/0/1/{}/iphone/stickerpack@2x.zip'.format(pack_id)
+        url = 'http://dl.stickershop.LINE.naver.jp/products/0/0/1/{}/iphone/stickers@2x.zip'.format(pack_id)
     r = requests.get(url, stream=True)
-    zip = zipfile.ZipFile(BytesIO(r.content))
-    zip_list = zip.namelist()
+    archive = zipfile.ZipFile(BytesIO(r.content))
+    zip_list = archive.namelist()
 
     img_list = []
     for x in zip_list:
-        if 'animation' in x:
-            image = Image.open(BytesIO(zip.read(x)))
-            img_list.append(optimize(image))
+        if anim:
+            if 'animation' in x:
+                image = Image.open(BytesIO(archive.read(x)))
+                img_list.append(optimize(image))
+        else:
+            if 'key' not in x:
+                image = Image.open(BytesIO(archive.read(x)))
+                img_list.append(optimize(image))
     return img_list
 
 
